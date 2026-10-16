@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Vehicule;
 import tn.esprit.autoloc.repository.VehiculeRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class VehiculeServicesImpl implements IVehiculeServices {
     @Override
     public Vehicule findById(Long id) {
         return vehiculeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Véhicule introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Véhicule introuvable avec l'id : " + id));
     }
 
     @Override

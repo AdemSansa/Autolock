@@ -1,0 +1,4 @@
+$kind: http-request
+method: GET
+url: '{{base_url}}/employes'
+order: 1000

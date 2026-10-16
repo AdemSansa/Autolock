@@ -1,0 +1,17 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/agences/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idAgence": 1,
+      "nom": "Agence Tunis Centre",
+      "ville": "Tunis",
+      "adresse": "15 Avenue Habib Bourguiba",
+      "telephone": "+21671234568"
+    }

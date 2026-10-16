@@ -1,0 +1,17 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/maintenances/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idMaintenance": 1,
+      "dateDebut": "2025-01-20",
+      "dateFin": "2025-01-25",
+      "description": "Vidange, revision annuelle et changement des freins",
+      "vehicule": { "idVehicule": 1 }
+    }

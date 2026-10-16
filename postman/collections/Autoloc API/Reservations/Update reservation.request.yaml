@@ -1,0 +1,18 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/reservations/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idReservation": 1,
+      "dateDebut": "2025-02-01",
+      "dateFin": "2025-02-07",
+      "statut": "CONFIRMEE",
+      "client": { "idClient": 1 },
+      "vehicule": { "idVehicule": 1 }
+    }

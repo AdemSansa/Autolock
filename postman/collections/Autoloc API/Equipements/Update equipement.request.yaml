@@ -1,0 +1,14 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/equipements/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idEquipement": 1,
+      "libelle": "Siege bebe"
+    }

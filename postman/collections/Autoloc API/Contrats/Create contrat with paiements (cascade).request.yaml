@@ -1,0 +1,21 @@
+$kind: http-request
+name: Create contrat with paiements (cascade)
+method: POST
+url: '{{base_url}}/contrats'
+order: 3500
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "dateSignature": "2025-11-02",
+      "montantTotal": 480.00,
+      "valide": true,
+      "reservation": { "idReservation": 1 },
+      "paiements": [
+        { "montant": 150.00, "datePaiement": "2025-11-02T10:00:00", "modePaiement": "CARTE" },
+        { "montant": 330.00, "datePaiement": "2025-11-06T10:00:00", "modePaiement": "VIREMENT" }
+      ]
+    }

@@ -25,5 +25,6 @@ public class Equipement {
     private String libelle;
 
     @ManyToMany(mappedBy = "equipements")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Vehicule> vehicules = new ArrayList<>();
 }

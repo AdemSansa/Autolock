@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Reservation;
 import tn.esprit.autoloc.repository.ReservationRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ReservationServicesImpl implements IReservationServices {
     @Transactional(readOnly = true)
     public Reservation findById(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Réservation introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Réservation introuvable avec l'id : " + id));
     }
 
     @Override

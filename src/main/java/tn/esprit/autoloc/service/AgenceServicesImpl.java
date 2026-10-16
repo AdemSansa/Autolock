@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.repository.AgenceRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class AgenceServicesImpl implements IAgenceServices {
     @Transactional(readOnly = true)
     public Agence findById(Long id) {
         return agenceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Agence introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Agence introuvable avec l'id : " + id));
     }
 
     @Override

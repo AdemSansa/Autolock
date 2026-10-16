@@ -1,0 +1,16 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/agences'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nom": "Agence Tunis Centre",
+      "ville": "Tunis",
+      "adresse": "12 Avenue Habib Bourguiba",
+      "telephone": "+21671234567"
+    }

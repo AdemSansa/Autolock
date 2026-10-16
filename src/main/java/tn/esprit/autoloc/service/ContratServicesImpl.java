@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Contrat;
 import tn.esprit.autoloc.repository.ContratRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ContratServicesImpl implements IContratServices {
     @Transactional(readOnly = true)
     public Contrat findById(Long id) {
         return contratRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contrat introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Contrat introuvable avec l'id : " + id));
     }
 
     @Override

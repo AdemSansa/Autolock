@@ -1,0 +1,11 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/maintenances'
+order: 6000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"dateDebut":"2025-01-20","dateFin":"2025-01-10","description":"Test","vehicule":{"idVehicule":1}}

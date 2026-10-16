@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Employe;
 import tn.esprit.autoloc.repository.EmployeRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class EmployeServicesImpl implements IEmployeServices {
     @Transactional(readOnly = true)
     public Employe findById(Long id) {
         return employeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employé introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Employé introuvable avec l'id : " + id));
     }
 
     @Override

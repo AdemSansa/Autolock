@@ -1,0 +1,16 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/contrats'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "dateSignature": "2025-01-15",
+      "montantTotal": 500.00,
+      "valide": true,
+      "reservation": { "idReservation": 1 }
+    }

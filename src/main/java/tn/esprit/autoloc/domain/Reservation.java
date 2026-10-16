@@ -39,5 +39,6 @@ public class Reservation {
     private Vehicule vehicule;
 
     @OneToOne(mappedBy = "reservation")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Contrat contrat;
 }

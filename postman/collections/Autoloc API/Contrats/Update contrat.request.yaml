@@ -1,0 +1,17 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/contrats/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idContrat": 1,
+      "dateSignature": "2025-01-15",
+      "montantTotal": 550.00,
+      "valide": true,
+      "reservation": { "idReservation": 1 }
+    }

@@ -1,0 +1,18 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/clients'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nom": "Ben Ali",
+      "prenom": "Mohamed",
+      "email": "m.benali@example.com",
+      "telephone": "+21612345678",
+      "numPermis": "TN12345678",
+      "dateInscription": "2025-01-10"
+    }

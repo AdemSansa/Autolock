@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Maintenance;
 import tn.esprit.autoloc.repository.MaintenanceRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class MaintenanceServicesImpl implements IMaintenanceServices {
     @Transactional(readOnly = true)
     public Maintenance findById(Long id) {
         return maintenanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Maintenance introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Maintenance introuvable avec l'id : " + id));
     }
 
     @Override

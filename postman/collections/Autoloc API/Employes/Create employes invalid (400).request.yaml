@@ -1,0 +1,11 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/employes'
+order: 6000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"nom":"","prenom":"","role":"AGENT","agence":{"idAgence":1}}

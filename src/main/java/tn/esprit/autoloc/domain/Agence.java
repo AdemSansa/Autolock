@@ -34,8 +34,10 @@ public class Agence {
     private String telephone;
 
     @OneToMany(mappedBy = "agence")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Vehicule> vehicules = new ArrayList<>();
 
     @OneToMany(mappedBy = "agence")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Employe> employes = new ArrayList<>();
 }

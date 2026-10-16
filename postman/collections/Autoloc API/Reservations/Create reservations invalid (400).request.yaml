@@ -1,0 +1,11 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/reservations'
+order: 6000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {"dateDebut":"2025-02-10","dateFin":"2025-02-01","statut":"EN_ATTENTE","client":{"idClient":1},"vehicule":{"idVehicule":1}}

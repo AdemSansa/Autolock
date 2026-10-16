@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Equipement;
 import tn.esprit.autoloc.repository.EquipementRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class EquipementServicesImpl implements IEquipementServices {
     @Transactional(readOnly = true)
     public Equipement findById(Long id) {
         return equipementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Équipement introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Équipement introuvable avec l'id : " + id));
     }
 
     @Override

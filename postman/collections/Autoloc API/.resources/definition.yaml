@@ -1,0 +1,3 @@
+$kind: collection
+name: Autoloc API
+description: 'REST API for the autoloc car rental management system. Spring Boot, context path: /api, port: 8080.'

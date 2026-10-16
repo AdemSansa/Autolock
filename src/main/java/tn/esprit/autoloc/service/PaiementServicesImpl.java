@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Paiement;
 import tn.esprit.autoloc.repository.PaiementRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class PaiementServicesImpl implements IPaiementServices {
     @Transactional(readOnly = true)
     public Paiement findById(Long id) {
         return paiementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Paiement introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Paiement introuvable avec l'id : " + id));
     }
 
     @Override

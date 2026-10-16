@@ -1,0 +1,19 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/vehicules'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "immatriculation": "TUN-123-AB",
+      "marque": "Renault",
+      "modele": "Clio",
+      "categorie": "CITADINE",
+      "tarifJournalier": 80.00,
+      "statut": "DISPONIBLE",
+      "agence": { "idAgence": 1 }
+    }

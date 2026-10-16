@@ -33,5 +33,6 @@ public class Paiement {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "contrat_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference("contrat-paiements")
     private Contrat contrat;
 }

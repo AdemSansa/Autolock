@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.domain.Client;
 import tn.esprit.autoloc.repository.ClientRepository;
+import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ClientServicesImpl implements IClientServices {
     @Transactional(readOnly = true)
     public Client findById(Long id) {
         return clientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client introuvable avec l'id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Client introuvable avec l'id : " + id));
     }
 
     @Override

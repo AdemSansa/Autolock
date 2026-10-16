@@ -47,9 +47,11 @@ public class Vehicule {
     private Agence agence;
 
     @OneToMany(mappedBy = "vehicule")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Reservation> reservations = new ArrayList<>();
 
     @OneToMany(mappedBy = "vehicule")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Maintenance> maintenances = new ArrayList<>();
 
     @ManyToMany

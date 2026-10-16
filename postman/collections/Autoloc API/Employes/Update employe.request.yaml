@@ -1,0 +1,17 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/employes/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idEmploye": 1,
+      "nom": "Trabelsi",
+      "prenom": "Sami",
+      "role": "MANAGER",
+      "agence": { "idAgence": 1 }
+    }

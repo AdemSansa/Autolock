@@ -1,0 +1,19 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/clients/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idClient": 1,
+      "nom": "Ben Ali",
+      "prenom": "Mohamed",
+      "email": "m.benali@example.com",
+      "telephone": "+21612345679",
+      "numPermis": "TN12345678",
+      "dateInscription": "2025-01-10"
+    }

@@ -1,0 +1,20 @@
+$kind: http-request
+method: PUT
+url: '{{base_url}}/vehicules/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idVehicule": 1,
+      "immatriculation": "TUN-123-AB",
+      "marque": "Renault",
+      "modele": "Clio",
+      "categorie": "BERLINE",
+      "tarifJournalier": 90.00,
+      "statut": "DISPONIBLE",
+      "agence": { "idAgence": 1 }
+    }
