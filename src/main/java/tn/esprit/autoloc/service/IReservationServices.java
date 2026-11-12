@@ -10,4 +10,7 @@ public interface IReservationServices {
     List<Reservation> findAll();
     void deleteById(Long id);
     Reservation update(Reservation reservation);
+
+    // Affectations
+    Reservation addAndAssignClientAndVehicule(Reservation reservation, Long idClient, Long idVehicule);
 }

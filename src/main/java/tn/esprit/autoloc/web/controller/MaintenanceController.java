@@ -50,6 +50,19 @@ public class MaintenanceController {
         return maintenanceServices.create(maintenance);
     }
 
+    @Operation(summary = "Créer une maintenance pour un véhicule")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Maintenance créée (véhicule en MAINTENANCE si pas de date de fin)"),
+            @ApiResponse(responseCode = "404", description = "Véhicule introuvable"),
+            @ApiResponse(responseCode = "400", description = "Dates invalides")
+    })
+    @PostMapping("/vehicule/{idVehicule}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Maintenance addAndAssignToVehicule(@Parameter(description = "Identifiant du véhicule") @PathVariable Long idVehicule,
+                                              @RequestBody Maintenance maintenance) {
+        return maintenanceServices.addAndAssignToVehicule(maintenance, idVehicule);
+    }
+
     @Operation(summary = "Modifier une maintenance")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Maintenance modifiée"),

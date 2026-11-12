@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Contrat;
+import tn.esprit.autoloc.domain.Paiement;
 import tn.esprit.autoloc.service.IContratServices;
 
 import java.util.List;
@@ -47,6 +48,31 @@ public class ContratController {
     @ResponseStatus(HttpStatus.CREATED)
     public Contrat create(@RequestBody Contrat contrat) {
         return contratServices.create(contrat);
+    }
+
+    @Operation(summary = "Créer un contrat avec ses paiements")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Contrat et paiements créés"),
+            @ApiResponse(responseCode = "404", description = "Réservation introuvable"),
+            @ApiResponse(responseCode = "400", description = "Requête invalide ou réservation déjà sous contrat")
+    })
+    @PostMapping("/with-paiements")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Contrat addWithPayments(@RequestBody Contrat contrat) {
+        return contratServices.addWithPayments(contrat);
+    }
+
+    @Operation(summary = "Ajouter un paiement à un contrat existant")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Paiement ajouté"),
+            @ApiResponse(responseCode = "404", description = "Contrat introuvable"),
+            @ApiResponse(responseCode = "400", description = "Montant invalide")
+    })
+    @PostMapping("/{idContrat}/paiements")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Contrat addPaiementToContrat(@Parameter(description = "Identifiant du contrat") @PathVariable Long idContrat,
+                                        @RequestBody Paiement paiement) {
+        return contratServices.addPaiementToContrat(idContrat, paiement);
     }
 
     @Operation(summary = "Modifier un contrat")

@@ -49,6 +49,29 @@ public class EmployeController {
         return employeServices.create(employe);
     }
 
+    @Operation(summary = "Créer un employé et l'affecter à une agence")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Employé créé et affecté"),
+            @ApiResponse(responseCode = "404", description = "Agence introuvable")
+    })
+    @PostMapping("/agence/{idAgence}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Employe addAndAssignToAgence(@Parameter(description = "Identifiant de l'agence") @PathVariable Long idAgence,
+                                        @RequestBody Employe employe) {
+        return employeServices.addAndAssignToAgence(employe, idAgence);
+    }
+
+    @Operation(summary = "Affecter un employé existant à une agence")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Employé affecté"),
+            @ApiResponse(responseCode = "404", description = "Employé ou agence introuvable")
+    })
+    @PutMapping("/{idEmploye}/agence/{idAgence}")
+    public Employe assignToAgence(@Parameter(description = "Identifiant de l'employé") @PathVariable Long idEmploye,
+                                  @Parameter(description = "Identifiant de l'agence") @PathVariable Long idAgence) {
+        return employeServices.assignToAgence(idEmploye, idAgence);
+    }
+
     @Operation(summary = "Modifier un employé")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Employé modifié"),
