@@ -10,4 +10,7 @@ public interface IMaintenanceServices {
     List<Maintenance> findAll();
     void deleteById(Long id);
     Maintenance update(Maintenance maintenance);
+
+    // Affectations
+    Maintenance addAndAssignToVehicule(Maintenance maintenance, Long idVehicule);
 }

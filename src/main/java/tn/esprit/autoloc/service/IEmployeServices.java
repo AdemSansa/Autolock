@@ -10,4 +10,8 @@ public interface IEmployeServices {
     List<Employe> findAll();
     void deleteById(Long id);
     Employe update(Employe employe);
+
+    // Affectations
+    Employe addAndAssignToAgence(Employe employe, Long idAgence);
+    Employe assignToAgence(Long idEmploye, Long idAgence);
 }

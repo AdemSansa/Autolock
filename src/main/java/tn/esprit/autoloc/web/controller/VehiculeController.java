@@ -126,6 +126,17 @@ public class VehiculeController {
         return vehiculeServices.unassignEquipement(idVehicule);
     }
 
+    @Operation(summary = "Retirer un équipement d'un véhicule")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Équipement retiré"),
+            @ApiResponse(responseCode = "404", description = "Véhicule introuvable ou équipement non affecté")
+    })
+    @DeleteMapping("/{idVehicule}/equipements/{idEquipement}")
+    public Vehicule unassignEquipement(@Parameter(description = "Identifiant du véhicule") @PathVariable Long idVehicule,
+                                       @Parameter(description = "Identifiant de l'équipement") @PathVariable Long idEquipement) {
+        return vehiculeServices.unassignEquipement(idVehicule, idEquipement);
+    }
+
     @Operation(summary = "Créer un véhicule avec ses équipements et l'affecter à une agence")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Véhicule et équipements créés, véhicule affecté"),

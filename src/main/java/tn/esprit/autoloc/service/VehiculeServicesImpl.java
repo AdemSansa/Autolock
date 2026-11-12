@@ -100,6 +100,21 @@ public class VehiculeServicesImpl implements IVehiculeServices {
     }
 
     /**
+     * Retire un seul équipement d'un véhicule.
+     */
+    @Override
+    @Transactional
+    public Vehicule unassignEquipement(Long idVehicule, Long idEquipement) {
+        Vehicule vehicule = findById(idVehicule);
+        boolean removed = vehicule.getEquipements().removeIf(e -> e.getIdEquipement().equals(idEquipement));
+        if (!removed) {
+            throw new ResourceNotFoundException("L'équipement " + idEquipement
+                    + " n'est pas affecté au véhicule " + idVehicule);
+        }
+        return vehiculeRepository.save(vehicule);
+    }
+
+    /**
      * Crée un véhicule avec ses équipements et l'affecte à une agence existante.
      * Les équipements sans id sont créés ; ceux avec un id doivent déjà exister.
      */

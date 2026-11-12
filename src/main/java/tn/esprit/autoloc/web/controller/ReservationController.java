@@ -50,6 +50,21 @@ public class ReservationController {
         return reservationServices.create(reservation);
     }
 
+    @Operation(summary = "Créer une réservation pour un client et un véhicule")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Réservation créée"),
+            @ApiResponse(responseCode = "404", description = "Client ou véhicule introuvable"),
+            @ApiResponse(responseCode = "400", description = "Dates invalides ou véhicule non disponible")
+    })
+    @PostMapping("/client/{idClient}/vehicule/{idVehicule}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Reservation addAndAssignClientAndVehicule(
+            @Parameter(description = "Identifiant du client") @PathVariable Long idClient,
+            @Parameter(description = "Identifiant du véhicule") @PathVariable Long idVehicule,
+            @RequestBody Reservation reservation) {
+        return reservationServices.addAndAssignClientAndVehicule(reservation, idClient, idVehicule);
+    }
+
     @Operation(summary = "Modifier une réservation")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Réservation modifiée"),
