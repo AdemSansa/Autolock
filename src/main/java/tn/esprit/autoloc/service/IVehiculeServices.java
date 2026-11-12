@@ -11,4 +11,10 @@ public interface IVehiculeServices {
     void deleteById(Long id);
     Vehicule update (Vehicule vehicule);
 
+    // Affectations
+    Vehicule addAndAssignToAgence(Vehicule vehicule, Long idAgence);
+    Vehicule assignToAgence(Long idVehicule, Long idAgence);
+    Vehicule assignEquipement(Long idVehicule, Long idEquipement);
+    Vehicule unassignEquipement(Long idVehicule);
+    Vehicule addVehiculeAndEquipementsAndAssignToAgence(Vehicule vehicule, Long idAgence);
 }
