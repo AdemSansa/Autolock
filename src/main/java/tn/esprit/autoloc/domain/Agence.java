@@ -40,4 +40,18 @@ public class Agence {
     @OneToMany(mappedBy = "agence")
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Employe> employes = new ArrayList<>();
+
+    /**
+     * Méthode de synchronisation : met à jour les deux côtés de l'association Agence <-> Vehicule.
+     */
+    public void addVehicule(Vehicule vehicule) {
+        Agence ancienne = vehicule.getAgence();
+        if (ancienne != null && ancienne != this) {
+            ancienne.getVehicules().remove(vehicule);
+        }
+        if (!vehicules.contains(vehicule)) {
+            vehicules.add(vehicule);
+        }
+        vehicule.setAgence(this);
+    }
 }

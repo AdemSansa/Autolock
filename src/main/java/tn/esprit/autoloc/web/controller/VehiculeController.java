@@ -7,14 +7,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tn.esprit.autoloc.domain.Vehicule;
+import tn.esprit.autoloc.domain.CategorieVehicule;
+import tn.esprit.autoloc.domain.StatutVehicule;
 import tn.esprit.autoloc.service.IVehiculeServices;
-import tn.esprit.autoloc.web.dto.vehicule.VehiculeMapper;
-import tn.esprit.autoloc.web.dto.vehicule.VehiculeRequest;
-import tn.esprit.autoloc.web.dto.vehicule.VehiculeResponse;
+import tn.esprit.autoloc.web.dto.NbVehiculesAgenceDTO;
+import tn.esprit.autoloc.web.dto.VehiculeAvecEquipementsRequestDTO;
+import tn.esprit.autoloc.web.dto.VehiculeRequestDTO;
+import tn.esprit.autoloc.web.dto.VehiculeResponseDTO;
+import tn.esprit.autoloc.web.dto.VehiculeResumeDTO;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -24,58 +31,48 @@ import java.util.List;
 public class VehiculeController {
 
     private final IVehiculeServices vehiculeServices;
-    private final VehiculeMapper vehiculeMapper;
 
-    @Operation(summary = "Lister les véhicules")
-    @ApiResponse(responseCode = "200", description = "Liste des véhicules")
+    // ===================== CRUD =====================
+
+    @Operation(summary = "Lister les véhicules (format résumé)")
     @GetMapping
-    public List<VehiculeResponse> findAll() {
-        return vehiculeMapper.toResponseList(vehiculeServices.findAll());
+    public List<VehiculeResumeDTO> findAll() {
+        return vehiculeServices.findAll();
     }
 
-    @Operation(summary = "Consulter un véhicule")
+    @Operation(summary = "Consulter un véhicule (agence et équipements chargés en une requête, J7)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Véhicule trouvé"),
             @ApiResponse(responseCode = "404", description = "Véhicule introuvable")
     })
     @GetMapping("/{id}")
-    public VehiculeResponse findById(@Parameter(description = "Identifiant du véhicule") @PathVariable Long id) {
-        return vehiculeMapper.toResponse(vehiculeServices.findById(id));
+    public VehiculeResponseDTO findById(@Parameter(description = "Identifiant du véhicule") @PathVariable Long id) {
+        return vehiculeServices.findById(id);
     }
 
-    @Operation(summary = "Créer un véhicule (idAgence obligatoire dans le corps)")
+    @Operation(summary = "Créer un véhicule (statut DISPONIBLE, affecté à l'agence agenceId)")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Véhicule créé"),
-            @ApiResponse(responseCode = "400", description = "Requête invalide"),
-            @ApiResponse(responseCode = "404", description = "Agence ou équipement introuvable")
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "404", description = "Agence introuvable"),
+            @ApiResponse(responseCode = "409", description = "Immatriculation déjà utilisée")
     })
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public VehiculeResponse create(@Valid @RequestBody VehiculeRequest request) {
-        if (request.idAgence() == null) {
-            throw new IllegalArgumentException("L'agence (idAgence) est obligatoire");
-        }
-        return createInAgence(request, request.idAgence());
+    public ResponseEntity<VehiculeResponseDTO> create(@Valid @RequestBody VehiculeRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(vehiculeServices.create(dto));
     }
 
-    @Operation(summary = "Modifier un véhicule",
-            description = "Met à jour les champs du véhicule. Si idAgence est fourni, le véhicule est réaffecté. "
-                    + "Les équipements se gèrent avec les endpoints /equipements.")
+    @Operation(summary = "Modifier un véhicule (le statut et les équipements ne changent pas)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Véhicule modifié"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
             @ApiResponse(responseCode = "404", description = "Véhicule ou agence introuvable"),
-            @ApiResponse(responseCode = "400", description = "Requête invalide")
+            @ApiResponse(responseCode = "409", description = "Immatriculation déjà utilisée")
     })
     @PutMapping("/{id}")
-    public VehiculeResponse update(@Parameter(description = "Identifiant du véhicule") @PathVariable Long id,
-                                   @Valid @RequestBody VehiculeRequest request) {
-        Vehicule vehicule = vehiculeServices.findById(id);
-        vehiculeMapper.updateEntity(request, vehicule);
-        vehicule = vehiculeServices.update(vehicule);
-        if (request.idAgence() != null) {
-            vehicule = vehiculeServices.assignToAgence(id, request.idAgence());
-        }
-        return vehiculeMapper.toResponse(vehicule);
+    public VehiculeResponseDTO update(@Parameter(description = "Identifiant du véhicule") @PathVariable Long id,
+                                      @Valid @RequestBody VehiculeRequestDTO dto) {
+        return vehiculeServices.update(id, dto);
     }
 
     @Operation(summary = "Supprimer un véhicule")
@@ -84,92 +81,155 @@ public class VehiculeController {
             @ApiResponse(responseCode = "404", description = "Véhicule introuvable")
     })
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@Parameter(description = "Identifiant du véhicule") @PathVariable Long id) {
-        vehiculeServices.findById(id);
+    public ResponseEntity<Void> deleteById(@Parameter(description = "Identifiant du véhicule") @PathVariable Long id) {
         vehiculeServices.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // ---------- Affectations ----------
+    // ===================== Affectations =====================
 
-    @Operation(summary = "Créer un véhicule et l'affecter à une agence")
+    @Operation(summary = "Créer un véhicule avec ses équipements (existants par id, nouveaux par libellé)")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Véhicule créé et affecté"),
-            @ApiResponse(responseCode = "404", description = "Agence introuvable"),
-            @ApiResponse(responseCode = "400", description = "Requête invalide")
+            @ApiResponse(responseCode = "201", description = "Véhicule et équipements créés"),
+            @ApiResponse(responseCode = "400", description = "Données invalides"),
+            @ApiResponse(responseCode = "404", description = "Agence ou équipement introuvable"),
+            @ApiResponse(responseCode = "409", description = "Immatriculation déjà utilisée")
     })
-    @PostMapping("/agence/{idAgence}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public VehiculeResponse addAndAssignToAgence(@Parameter(description = "Identifiant de l'agence") @PathVariable Long idAgence,
-                                                 @Valid @RequestBody VehiculeRequest request) {
-        return createInAgence(request, idAgence);
+    @PostMapping("/avec-equipements")
+    public ResponseEntity<VehiculeResponseDTO> addVehiculeAndEquipements(
+            @Valid @RequestBody VehiculeAvecEquipementsRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(vehiculeServices.addVehiculeAndEquipements(dto));
     }
 
     @Operation(summary = "Affecter un véhicule existant à une agence")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Véhicule affecté"),
-            @ApiResponse(responseCode = "404", description = "Véhicule ou agence introuvable")
-    })
     @PutMapping("/{idVehicule}/agence/{idAgence}")
-    public VehiculeResponse assignToAgence(@Parameter(description = "Identifiant du véhicule") @PathVariable Long idVehicule,
-                                           @Parameter(description = "Identifiant de l'agence") @PathVariable Long idAgence) {
-        return vehiculeMapper.toResponse(vehiculeServices.assignToAgence(idVehicule, idAgence));
+    public VehiculeResponseDTO assignToAgence(@PathVariable Long idVehicule, @PathVariable Long idAgence) {
+        return vehiculeServices.assignToAgence(idVehicule, idAgence);
     }
 
     @Operation(summary = "Affecter un équipement à un véhicule")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Équipement affecté"),
-            @ApiResponse(responseCode = "404", description = "Véhicule ou équipement introuvable")
-    })
     @PutMapping("/{idVehicule}/equipements/{idEquipement}")
-    public VehiculeResponse assignEquipement(@Parameter(description = "Identifiant du véhicule") @PathVariable Long idVehicule,
-                                             @Parameter(description = "Identifiant de l'équipement") @PathVariable Long idEquipement) {
-        return vehiculeMapper.toResponse(vehiculeServices.assignEquipement(idVehicule, idEquipement));
+    public VehiculeResponseDTO assignEquipement(@PathVariable Long idVehicule, @PathVariable Long idEquipement) {
+        return vehiculeServices.assignEquipement(idVehicule, idEquipement);
     }
 
     @Operation(summary = "Retirer tous les équipements d'un véhicule")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Équipements retirés"),
-            @ApiResponse(responseCode = "404", description = "Véhicule introuvable")
-    })
     @DeleteMapping("/{idVehicule}/equipements")
-    public VehiculeResponse unassignEquipement(@Parameter(description = "Identifiant du véhicule") @PathVariable Long idVehicule) {
-        return vehiculeMapper.toResponse(vehiculeServices.unassignEquipement(idVehicule));
+    public VehiculeResponseDTO unassignEquipement(@PathVariable Long idVehicule) {
+        return vehiculeServices.unassignEquipement(idVehicule);
     }
 
     @Operation(summary = "Retirer un équipement d'un véhicule")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Équipement retiré"),
-            @ApiResponse(responseCode = "404", description = "Véhicule introuvable ou équipement non affecté")
-    })
     @DeleteMapping("/{idVehicule}/equipements/{idEquipement}")
-    public VehiculeResponse unassignEquipement(@Parameter(description = "Identifiant du véhicule") @PathVariable Long idVehicule,
-                                               @Parameter(description = "Identifiant de l'équipement") @PathVariable Long idEquipement) {
-        return vehiculeMapper.toResponse(vehiculeServices.unassignEquipement(idVehicule, idEquipement));
+    public VehiculeResponseDTO unassignEquipement(@PathVariable Long idVehicule, @PathVariable Long idEquipement) {
+        return vehiculeServices.unassignEquipement(idVehicule, idEquipement);
     }
 
-    @Operation(summary = "Créer un véhicule avec ses équipements et l'affecter à une agence",
-            description = "equipementIds = équipements existants, nouveauxEquipements = libellés à créer")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Véhicule et équipements créés, véhicule affecté"),
-            @ApiResponse(responseCode = "404", description = "Agence ou équipement introuvable"),
-            @ApiResponse(responseCode = "400", description = "Requête invalide")
-    })
-    @PostMapping("/equipements/agence/{idAgence}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public VehiculeResponse addVehiculeAndEquipementsAndAssignToAgence(
-            @Parameter(description = "Identifiant de l'agence") @PathVariable Long idAgence,
-            @Valid @RequestBody VehiculeRequest request) {
-        return createInAgence(request, idAgence);
+    // ===================== Étape 6 — Keywords (K1 à K10) =====================
+
+    @Operation(summary = "K1 — véhicules d'une marque")
+    @GetMapping("/recherche/marque/{marque}")
+    public List<VehiculeResumeDTO> findByMarque(@PathVariable String marque) {
+        return vehiculeServices.findByMarque(marque);
     }
 
-    /**
-     * Toutes les créations passent par le même service : il charge l'agence, résout les équipements
-     * existants (par id) et crée les nouveaux (par libellé).
-     */
-    private VehiculeResponse createInAgence(VehiculeRequest request, Long idAgence) {
-        Vehicule vehicule = vehiculeMapper.toEntity(request);
-        return vehiculeMapper.toResponse(
-                vehiculeServices.addVehiculeAndEquipementsAndAssignToAgence(vehicule, idAgence));
+    @Operation(summary = "K2 — véhicules d'une catégorie et d'un statut")
+    @GetMapping("/recherche/categorie/{categorie}/statut/{statut}")
+    public List<VehiculeResumeDTO> findByCategorieEtStatut(@PathVariable CategorieVehicule categorie,
+                                                           @PathVariable StatutVehicule statut) {
+        return vehiculeServices.findByCategorieEtStatut(categorie, statut);
+    }
+
+    @Operation(summary = "K3 — tarif entre min et max, triés par tarif croissant")
+    @GetMapping("/recherche/tarif/{min}/{max}")
+    public List<VehiculeResumeDTO> findByTarifEntre(@PathVariable BigDecimal min, @PathVariable BigDecimal max) {
+        return vehiculeServices.findByTarifEntre(min, max);
+    }
+
+    @Operation(summary = "K4 — modèle contenant un mot-clé (insensible à la casse)")
+    @GetMapping("/recherche/modele/{motCle}")
+    public List<VehiculeResumeDTO> findByModeleContenant(@PathVariable String motCle) {
+        return vehiculeServices.findByModeleContenant(motCle);
+    }
+
+    @Operation(summary = "K5 — véhicules d'une liste de catégories (séparées par des virgules, ex. SUV,BERLINE)")
+    @GetMapping("/recherche/categories/{categories}")
+    public List<VehiculeResumeDTO> findByCategories(@PathVariable List<CategorieVehicule> categories) {
+        return vehiculeServices.findByCategories(categories);
+    }
+
+    @Operation(summary = "K6 — une immatriculation existe-t-elle déjà ?")
+    @GetMapping("/recherche/existe/{immatriculation}")
+    public boolean existeImmatriculation(@PathVariable String immatriculation) {
+        return vehiculeServices.existeImmatriculation(immatriculation);
+    }
+
+    @Operation(summary = "K7 — nombre de véhicules dans un statut")
+    @GetMapping("/recherche/nombre/statut/{statut}")
+    public long compterParStatut(@PathVariable StatutVehicule statut) {
+        return vehiculeServices.compterParStatut(statut);
+    }
+
+    @Operation(summary = "K8 — les 3 véhicules les moins chers")
+    @GetMapping("/recherche/moins-chers")
+    public List<VehiculeResumeDTO> findTop3MoinsChers() {
+        return vehiculeServices.findTop3MoinsChers();
+    }
+
+    @Operation(summary = "K9 — véhicules d'une agence")
+    @GetMapping("/recherche/agence/{agenceId}")
+    public List<VehiculeResumeDTO> findByAgence(@PathVariable Long agenceId) {
+        return vehiculeServices.findByAgence(agenceId);
+    }
+
+    @Operation(summary = "K10 — véhicules sans agence")
+    @GetMapping("/recherche/sans-agence")
+    public List<VehiculeResumeDTO> findSansAgence() {
+        return vehiculeServices.findSansAgence();
+    }
+
+    // ===================== Étape 7 — Jointures JPQL (J1 à J8) =====================
+
+    @Operation(summary = "J1 — véhicules des agences d'une ville")
+    @GetMapping("/ville/{ville}")
+    public List<VehiculeResumeDTO> findByVilleAgence(@PathVariable String ville) {
+        return vehiculeServices.findByVilleAgence(ville);
+    }
+
+    @Operation(summary = "J2 — véhicules possédant un équipement donné (libellé)")
+    @GetMapping("/equipement/{libelle}")
+    public List<VehiculeResumeDTO> findByEquipement(@PathVariable String libelle) {
+        return vehiculeServices.findByEquipement(libelle);
+    }
+
+    @Operation(summary = "J3 — véhicules possédant au moins N équipements")
+    @GetMapping("/equipements/min/{n}")
+    public List<VehiculeResumeDTO> findAvecAuMoinsNEquipements(@PathVariable long n) {
+        return vehiculeServices.findAvecAuMoinsNEquipements(n);
+    }
+
+    @Operation(summary = "J4 — véhicules déjà réservés par un client")
+    @GetMapping("/client/{clientId}")
+    public List<VehiculeResumeDTO> findReservesParClient(@PathVariable Long clientId) {
+        return vehiculeServices.findReservesParClient(clientId);
+    }
+
+    @Operation(summary = "J5 — véhicules jamais réservés")
+    @GetMapping("/jamais-reserves")
+    public List<VehiculeResumeDTO> findJamaisReserves() {
+        return vehiculeServices.findJamaisReserves();
+    }
+
+    @Operation(summary = "J6 — véhicules en maintenance à une date (format AAAA-MM-JJ)")
+    @GetMapping("/maintenance/{date}")
+    public List<VehiculeResumeDTO> findEnMaintenanceLe(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return vehiculeServices.findEnMaintenanceLe(date);
+    }
+
+    @Operation(summary = "J8 — nombre de véhicules par agence")
+    @GetMapping("/stats/par-agence")
+    public List<NbVehiculesAgenceDTO> compterParAgence() {
+        return vehiculeServices.compterParAgence();
     }
 }
