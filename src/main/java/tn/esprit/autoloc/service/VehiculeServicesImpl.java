@@ -9,6 +9,7 @@ import tn.esprit.autoloc.domain.Vehicule;
 import tn.esprit.autoloc.repository.AgenceRepository;
 import tn.esprit.autoloc.repository.EquipementRepository;
 import tn.esprit.autoloc.repository.VehiculeRepository;
+import tn.esprit.autoloc.web.dto.VehiculeDTO;
 import tn.esprit.autoloc.web.exception.ResourceNotFoundException;
 
 import java.util.ArrayList;
@@ -142,5 +143,10 @@ public class VehiculeServicesImpl implements IVehiculeServices {
     private Agence findAgence(Long idAgence) {
         return agenceRepository.findById(idAgence)
                 .orElseThrow(() -> new ResourceNotFoundException("Agence introuvable avec l'id : " + idAgence));
+    }
+    public VehiculeDTO toDTO(Vehicule vehicule)
+    {
+        VehiculeDTO vehiculeDTO = new VehiculeDTO();
+
     }
 }
